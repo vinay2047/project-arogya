@@ -1,79 +1,56 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import verifyDoctorAction from "@/actions/doctor.actions";
 
 export default function DoctorOnboardingForm() {
-  const [hprId, setHprId] = useState("");
-  const [aadhaar, setAadhaar] = useState("");
-  const [licenseNumber, setLicenseNumber] = useState("");
-  const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const [isPending, startTransition] = useTransition();
 
-  const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setResult(null);
-
-    try {
-      const res = await fetch("/api/verify-doctor", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          hprId: hprId.trim() || undefined,
-          aadhaar: aadhaar.trim() || undefined,
-          licenseNumber: licenseNumber.trim() || undefined,
-        }),
-      });
-
-      const data = await res.json();
-      setResult(data);
-    } catch (err) {
-      console.error(err);
-      setResult({ error: "Something went wrong. Please try again." });
-    } finally {
-      setLoading(false);
-    }
+  const handleAction = async (formData: FormData) => {
+    startTransition(async () => {
+      const res = await verifyDoctorAction(formData);
+      setResult(res);
+    });
   };
 
   return (
-    <form onSubmit={handleVerify} className="flex flex-col gap-4 w-full max-w-md">
-      <h2 className="text-xl font-semibold text-center">Doctor Verification</h2>
+    <form
+      action={handleAction}
+      className="flex flex-col gap-4 w-full max-w-md p-6 border rounded-xl shadow-sm"
+    >
+      <h2 className="text-2xl font-semibold text-center mb-2">
+        Doctor Onboarding
+      </h2>
 
-      <Input
-        placeholder="Enter your HPR ID (e.g., HPR-1234-5678-9012)"
-        value={hprId}
-        onChange={(e) => setHprId(e.target.value)}
+      {/* Official Verification Info */}
+      <Input name="hprId" placeholder="HPR ID (e.g., 71-XXXX-XXXX-XXXX)" required />
+      <Input name="aadhaar" placeholder="Aadhaar Number (Optional)" />
+      <Input name="licenseNumber" placeholder="Medical License Number (Optional)" />
+
+      {/* Profile Details */}
+      <Input name="specialization" placeholder="Specialization (e.g., Cardiology)" required />
+      <Input name="experienceYears" placeholder="Experience (in years)" type="number" min="0" />
+      <Input name="hospitalId" placeholder="Hospital ID (optional)" />
+      <Textarea
+        name="tags"
+        placeholder="Tags (comma separated, e.g., cardiology, diabetes, surgery)"
       />
 
-      <Input
-        placeholder="Aadhaar Number (optional)"
-        value={aadhaar}
-        onChange={(e) => setAadhaar(e.target.value)}
-      />
-
-      <Input
-        placeholder="Medical License Number (optional)"
-        value={licenseNumber}
-        onChange={(e) => setLicenseNumber(e.target.value)}
-      />
-
-      <Button type="submit" disabled={loading}>
-        {loading ? "Verifying..." : "Verify Doctor"}
+      <Button type="submit" disabled={isPending}>
+        {isPending ? "Verifying & Saving..." : "Verify and Create Profile"}
       </Button>
 
       {result && (
-        <div className="mt-4 text-center">
-          {result.verified ? (
-            <p className="text-green-600">
-              ✅ Verified! HPR ID: {result.hprId}
-            </p>
-          ) : (
-            <p className="text-red-600">
-              ❌ {result.error || "Verification failed"}
-            </p>
-          )}
+        <div
+          className={`mt-4 text-center ${
+            result.verified ? "text-green-600" : "text-red-600"
+          }`}
+        >
+          {result.message || result.error}
         </div>
       )}
     </form>
