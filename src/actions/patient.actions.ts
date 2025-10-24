@@ -1,0 +1,59 @@
+"use server";
+
+import { redirect } from "next/navigation";
+import { createClient } from "../../utils/supabase/server";
+
+
+export async function createPatientProfile(formData: FormData) {
+  const supabase = await createClient();
+
+  const dob = formData.get("dob") as string;
+  const gender = formData.get("gender") as string;
+  const blood_group = formData.get("blood_group") as string;
+  const address = formData.get("address") as string;
+
+  // 1️⃣ Validate inputs
+  if (!dob || !gender || !blood_group || !address) {
+    throw new Error("All fields are required");
+  }
+
+  // 2️⃣ Get authenticated user
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    redirect("/auth/signup");
+  }
+
+  // 3️⃣ Check if patient profile already exists
+  const { data: existing } = await supabase
+    .from("patient_profiles")
+    .select("user_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (existing) {
+    throw new Error("Profile already exists");
+  }
+
+  // 4️⃣ Insert patient profile
+  const { error } = await supabase.from("patient_profiles").insert([
+    {
+      user_id: user.id,
+      dob,
+      gender,
+      blood_group,
+      address,
+    },
+  ]);
+
+  if (error) {
+    console.error("Insert error:", error.message);
+    throw new Error(error.message);
+  }
+
+  
+  redirect("/dashboard/patient");
+}
