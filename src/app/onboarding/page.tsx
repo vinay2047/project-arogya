@@ -1,18 +1,16 @@
-
-
-import { createClient } from "../../../utils/supabase/server";
 import DoctorOnboardingForm from "@/components/onboarding/DoctorOnboardingForm";
 import PatientOnboardingForm from "@/components/onboarding/PatientOnboardingForm";
-
+import { createClient } from "../../supabase/server";
 
 export default async function OnboardingPage() {
- const supabase = await createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return <div className="text-center mt-10">Please log in first.</div>;
+  if (!user)
+    return <div className="text-center mt-10">Please log in first.</div>;
 
   const { data: profile, error } = await supabase
     .from("profiles")

@@ -1,10 +1,31 @@
 import Link from "next/link";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "../../supabase/server";
 
 export default async function BillsPage() {
-  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+  const supabase = await createClient();
 
-  const { data: bills } = await supabase.from("bills").select("id, amount, status");
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return (
+      <div className="p-6">
+        <h1 className="text-2xl font-semibold mb-4">
+          Please log in to view your bills
+        </h1>
+      </div>
+    );
+  }
+
+  const { data: bills, error } = await supabase
+    .from("bills")
+    .select("id, amount, status")
+    .eq("patient_id", user.id);
+
+  if (error) {
+    console.error("Error fetching bills:", error.message);
+  }
 
   return (
     <div className="p-6">
@@ -19,8 +40,12 @@ export default async function BillsPage() {
               <div>
                 <p>Bill ID: {bill.id}</p>
                 <p>Amount: ₹{bill.amount}</p>
+                <p>Status: {bill.status}</p>
               </div>
-              <Link href={`/bills/${bill.id}`} className="text-blue-600 hover:underline">
+              <Link
+                href={`/bills/${bill.id}`}
+                className="text-blue-600 hover:underline"
+              >
                 View
               </Link>
             </li>

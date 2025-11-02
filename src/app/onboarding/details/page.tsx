@@ -1,19 +1,19 @@
 "use server";
 
-import { redirect } from "next/navigation";
-import { createClient } from "../../../../utils/supabase/server";
 import { setUserDetails } from "@/actions/user.actions";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { redirect } from "next/navigation";
+import { createClient } from "../../../supabase/server";
 
 export default async function OnboardingPage() {
   const supabase = await createClient();

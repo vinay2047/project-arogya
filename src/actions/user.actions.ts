@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { createClient } from "../../utils/supabase/server";
+import { createClient } from "../supabase/server";
 
 export async function setUserDetails(formData: FormData) {
   const supabase = await createClient();
@@ -13,7 +13,6 @@ export async function setUserDetails(formData: FormData) {
     return { error: "Both name and role are required." };
   }
 
-  
   const {
     data: { user },
     error: userError,
@@ -22,7 +21,6 @@ export async function setUserDetails(formData: FormData) {
   if (userError || !user) {
     return { error: "Not authenticated. Please log in again." };
   }
-
 
   const { data: existing } = await supabase
     .from("profiles")
@@ -42,6 +40,5 @@ export async function setUserDetails(formData: FormData) {
     return { error: error.message };
   }
 
- 
- redirect("/onboarding");
+  redirect("/onboarding");
 }

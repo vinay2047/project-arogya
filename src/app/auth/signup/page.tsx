@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // ✅ optional, for nicer messages
 
 export default function SignupPage() {
   const [message, setMessage] = useState<string | null>(null);
@@ -33,7 +34,7 @@ export default function SignupPage() {
     setLoading(false);
 
     if (res?.error) setError(res.error);
-    else setMessage("Check your email to verify your account before continuing.");
+    else setMessage("✅ Check your email to verify your account before continuing.");
   }
 
   return (
@@ -50,38 +51,46 @@ export default function SignupPage() {
         </CardHeader>
 
         <CardContent>
-          {message ? (
-            <div className="text-center text-green-600 font-medium py-6">
-              {message}
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
-                <Input id="password" name="password" type="password" required />
-              </div>
-
-              <Button type="submit" className="w-full mt-4" disabled={loading}>
-                {loading ? "Creating account..." : "Sign Up"}
-              </Button>
-
-              <GoogleLoginButton />
-
-              {error && (
-                <p className="text-red-600 text-sm text-center mt-2">{error}</p>
-              )}
-            </form>
+          {/* ✅ SUCCESS MESSAGE */}
+          {message && (
+            <Alert className="bg-green-50 border-green-500 text-green-800 mb-4">
+              <AlertTitle>Success</AlertTitle>
+              <AlertDescription>{message}</AlertDescription>
+            </Alert>
           )}
+
+          {/* ❌ ERROR MESSAGE */}
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {/* FORM */}
+          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="m@example.com"
+                required
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="password">Password</Label>
+              <Input id="password" name="password" type="password" required />
+            </div>
+
+            <Button type="submit" className="w-full mt-4" disabled={loading}>
+              {loading ? "Creating account..." : "Sign Up"}
+            </Button>
+
+            <GoogleLoginButton />
+          </form>
         </CardContent>
       </Card>
     </div>

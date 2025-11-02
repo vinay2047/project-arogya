@@ -1,8 +1,12 @@
+import LogoutButton from "@/app/components/LogoutButton"
+
 
 
 function page() {
   return (
-    <div>page</div>
+    <div>
+      <LogoutButton />
+    </div>
   )
 }
 

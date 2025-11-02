@@ -1,7 +1,7 @@
 "use server";
 
+import { createClient } from "@/supabase/server";
 import axios from "axios";
-import { createClient } from "../../utils/supabase/server";
 
 
 export default async function verifyDoctorAction(formData: FormData) {
@@ -19,7 +19,7 @@ export default async function verifyDoctorAction(formData: FormData) {
   }
 
   try {
-    // 1️⃣ Get ABDM Access Token
+    
     const tokenRes = await axios.post(
       "https://live.abdm.gov.in/gateway/v0.5/sessions",
       {
@@ -33,7 +33,7 @@ export default async function verifyDoctorAction(formData: FormData) {
     const accessToken = tokenRes.data?.accessToken;
     if (!accessToken) throw new Error("Failed to obtain ABDM token");
 
-    // 2️⃣ Verify HPR ID
+    
     const verifyRes = await axios.post(
       "https://hprid.abdm.gov.in/api/v2/registration/aadhaar/checkHpIdAccountExist",
       {
@@ -51,14 +51,12 @@ export default async function verifyDoctorAction(formData: FormData) {
     const verifyData = verifyRes.data;
     const verified = verifyData?.hprIdNumber?.includes(hprId);
 
-    // 3️⃣ If verified → insert into DB
+  
     if (verified) {
       const supabase = await createClient();
 
-      const {
-        data: sessionData,
-        error: sessionError,
-      } = await supabase.auth.getUser();
+      const { data: sessionData, error: sessionError } =
+        await supabase.auth.getUser();
       if (sessionError || !sessionData.user) {
         return { verified: false, error: "No active user session." };
       }

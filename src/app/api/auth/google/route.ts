@@ -1,6 +1,5 @@
-
 import { redirect } from "next/navigation";
-import { createClient } from "../../../../../utils/supabase/server";
+import { createClient } from "../../../../supabase/server";
 
 export async function GET() {
   const supabase = await createClient();
@@ -8,7 +7,7 @@ export async function GET() {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/`, 
+      redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback`,
     },
   });
 

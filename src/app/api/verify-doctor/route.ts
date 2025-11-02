@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 
-/**
- * Verify a doctor's HPR record using Aadhaar or HPR ID.
- * Works with ABDM sandbox endpoints.
- */
+
 export async function POST(req: Request) {
   try {
     const { aadhaar, hprId } = await req.json();
@@ -12,7 +9,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Either Aadhaar or HPR ID is required." }, { status: 400 });
     }
 
-    // STEP 1️⃣ — Get Gateway access token
+    
     const tokenRes = await fetch("https://dev.abdm.gov.in/gateway/v0.5/sessions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
