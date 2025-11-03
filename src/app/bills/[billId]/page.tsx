@@ -1,8 +1,15 @@
+import PaymentButton from "@/components/PaymentButton";
 import { createClient } from "@supabase/supabase-js";
-import PaymentButton from "@/app/components/PaymentButton";
 
-export default async function BillPage({ params }: { params: { billId: string } }) {
-  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+export default async function BillPage({
+  params,
+}: {
+  params: { billId: string };
+}) {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   const { data: bill } = await supabase
     .from("bills")
