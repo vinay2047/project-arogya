@@ -40,6 +40,7 @@ export default function BookAppointmentPage() {
     }
 
     // Get logged-in patient
+    const supabase =createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
