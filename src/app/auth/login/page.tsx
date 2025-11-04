@@ -43,7 +43,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md shadow-xl border border-amber-200/60 bg-white/90 backdrop-blur-md rounded-2xl transition-all duration-300 hover:shadow-2xl">
         <CardHeader className="text-center space-y-1">
           <CardTitle className="text-3xl font-semibold text-amber-900">
-            Welcome Back 👋
+            Welcome Back 
           </CardTitle>
           <CardDescription className="text-amber-700">
             Log in to continue your consultation journey
