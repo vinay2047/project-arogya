@@ -1,17 +1,16 @@
 "use client";
 
+import "stream-chat-react/dist/css/v2/index.css";
 import { useEffect, useState } from "react";
-import { Channel as StreamChannel, StreamChat } from "stream-chat";
+import { StreamChat } from "stream-chat";
 import {
+  Chat,
   Channel,
   ChannelHeader,
-  Chat,
-  LoadingIndicator,
-  MessageInput,
   MessageList,
+  MessageInput,
   Window,
 } from "stream-chat-react";
-import "stream-chat-react/dist/css/v2/index.css";
 
 type ChatRoomProps = {
   user: { id: string; name: string };
@@ -27,28 +26,33 @@ export default function ChatRoom({
   appointmentId,
 }: ChatRoomProps) {
   const [client, setClient] = useState<StreamChat | null>(null);
-  const [channel, setChannel] = useState<StreamChannel | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [channel, setChannel] = useState<any>(null);
 
   useEffect(() => {
-    const init = async () => {
+    const initChat = async () => {
       try {
+        // ✅ Fetch Stream token and ensure both users exist
         const res = await fetch("/api/stream-token", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             user_id: user.id,
             name: user.name,
+            otherUsers: [
+              { id: doctorId },
+              { id: patientId },
+            ],
           }),
         });
 
         const data = await res.json();
 
         if (!data.token) {
-          console.error("Chat token fetch failed:", data);
+          console.error("❌ Failed to fetch Stream token:", data);
           return;
         }
 
+        // ✅ Initialize Stream client
         const apiKey = process.env.NEXT_PUBLIC_STREAM_API_KEY!;
         const streamClient = StreamChat.getInstance(apiKey);
 
@@ -57,47 +61,34 @@ export default function ChatRoom({
           data.token
         );
 
-        const members = [doctorId, patientId];
+        // ✅ Create or get the appointment channel
+        const channel = streamClient.channel("messaging", `appointment-${appointmentId}`, {
+          members: [doctorId, patientId],
+          custom: { appointmentId },
+        });
 
-        const ch = streamClient.channel(
-          "messaging",
-          `appointment-${appointmentId}`,
-          {
-            members,
-            appointmentId,
-          } as any
-        );
-
-        await ch.watch();
+        await channel.watch();
 
         setClient(streamClient);
-        setChannel(ch);
+        setChannel(channel);
 
-        return () => streamClient.disconnectUser();
-      } catch (err) {
-        console.error("Error initializing chat:", err);
+        return () => {
+          streamClient.disconnectUser();
+        };
+      } catch (error) {
+        console.error("💥 Error initializing chat:", error);
       }
     };
 
-    init();
-  }, [appointmentId, doctorId, patientId, user.id, user.name]);
+    initChat();
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center py-8">
-        <LoadingIndicator />
-        <span className="ml-2 text-gray-600">Loading chat...</span>
-      </div>
-    );
-  }
+    // Cleanup when component unmounts
+    return () => {
+      if (client) client.disconnectUser();
+    };
+  }, [user.id, user.name, doctorId, patientId, appointmentId]);
 
-  if (!client || !channel) {
-    return (
-      <div className="text-center py-8 text-gray-500">
-        Unable to load chat. Please try again later.
-      </div>
-    );
-  }
+  if (!client || !channel) return <div>Loading chat...</div>;
 
   return (
     <Chat client={client} theme="str-chat__theme-light">
@@ -105,7 +96,7 @@ export default function ChatRoom({
         <Window>
           <ChannelHeader title={`Appointment #${appointmentId}`} />
           <MessageList />
-          <MessageInput focus placeholder="Type your message..." />
+          <MessageInput focus />
         </Window>
       </Channel>
     </Chat>

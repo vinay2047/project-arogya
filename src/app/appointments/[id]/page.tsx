@@ -1,8 +1,14 @@
 import AppointmentClient from "@/components/AppointmentClient";
 import { createClient } from "@/supabase/server";
 
+export default async function AppointmentPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  // ✅ Await the params promise first
+  const { id } = await params;
 
-export default async function AppointmentPage({ params }: { params: { id: string } }) {
   const supabase = await createClient();
 
   const {
@@ -16,11 +22,11 @@ export default async function AppointmentPage({ params }: { params: { id: string
       </div>
     );
 
-  // Fetch appointment and doctor name
+  // ✅ Use id normally now
   const { data: appointment } = await supabase
     .from("appointments")
     .select("id, doctor_id, patient_id, scheduled_at")
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
 
   if (!appointment)
