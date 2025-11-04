@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { signInWithGoogle } from "@/actions/auth.actions";
+
 import { useTransition } from "react";
 
 /**
@@ -20,9 +20,12 @@ export default function GoogleLoginButton({
 }) {
   const [isPending, startTransition] = useTransition();
 
-  const handleGoogleLogin = () => {
-    startTransition(async () => {
-      await signInWithGoogle();
+
+  const handleGoogleSignIn = () => {
+    startTransition(() => {
+      // 🔥 Redirect the browser to your API route that starts OAuth
+      window.location.href = "/api/auth/google";
+
     });
   };
 
@@ -30,7 +33,7 @@ export default function GoogleLoginButton({
     <Button
       type="button"
       variant="outline"
-      onClick={handleGoogleLogin}
+      onClick={handleGoogleSignIn}
       disabled={isPending}
       className={`flex items-center justify-center gap-2 border border-amber-300 hover:bg-amber-50 text-amber-900 font-medium py-2.5 transition-all duration-150 ${className}`}
     >
