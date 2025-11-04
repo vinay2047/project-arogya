@@ -1,30 +1,47 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-// Google logo
+import Image from "next/image";
+import { signInWithGoogle } from "@/actions/auth.actions";
 import { useTransition } from "react";
-import { signInWithGoogle } from "@/actions/auth.actions"; // Your existing action
 
-export default function GoogleLoginButton() {
+/**
+ * Google Login Button
+ * - Displays the Google icon and text.
+ * - Works with your existing `signInWithGoogle` server action.
+ * - Can accept className & iconClassName props for flexible styling.
+ */
+export default function GoogleLoginButton({
+  className = "",
+  iconClassName = "w-5 h-5",
+}: {
+  className?: string;
+  iconClassName?: string;
+}) {
   const [isPending, startTransition] = useTransition();
 
-  const handleGoogleSignIn = () => {
-    startTransition(() => {
-      // ✅ We explicitly ignore returned value to satisfy React types
-      void signInWithGoogle();
+  const handleGoogleLogin = () => {
+    startTransition(async () => {
+      await signInWithGoogle();
     });
   };
 
   return (
     <Button
       type="button"
-      onClick={handleGoogleSignIn}
+      variant="outline"
+      onClick={handleGoogleLogin}
       disabled={isPending}
-      className="w-full flex items-center justify-center gap-2 border border-amber-300 bg-white hover:bg-amber-50 text-amber-800 font-medium shadow-sm rounded-lg transition-all duration-200"
+      className={`flex items-center justify-center gap-2 border border-amber-300 hover:bg-amber-50 text-amber-900 font-medium py-2.5 transition-all duration-150 ${className}`}
     >
-     
+      <Image
+        src="https://www.svgrepo.com/show/475656/google-color.svg"
+        alt="Google Icon"
+        width={20}
+        height={20}
+        className={iconClassName}
+      />
       {isPending ? "Signing in..." : "Sign in with Google"}
     </Button>
   );
 }
-

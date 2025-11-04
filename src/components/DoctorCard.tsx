@@ -1,26 +1,70 @@
+"use client";
+
+import React from "react";
+
 interface DoctorCardProps {
-  doctor: any; // full doctor object
-  onSelect: () => void;
+  doctor_code: string;
+  name: string;
+  specialization: string;
+  experience_years?: number;
+  onBook: () => void;
 }
 
-export default function DoctorCard({ doctor, onSelect }: DoctorCardProps) {
-  return (
-    <div className="bg-white shadow rounded-xl p-4 flex flex-col justify-between">
-      <div>
-        <h3 className="font-bold text-lg">{doctor.doctor_code}</h3>
-        {doctor.specialization && <p className="text-gray-600">Specialization: {doctor.specialization}</p>}
-        {doctor.experience_years != null && <p className="text-gray-600">Experience: {doctor.experience_years} years</p>}
-        {doctor.hpr_id && <p className="text-gray-600">HPR ID: {doctor.hpr_id}</p>}
-        {doctor.license_number && <p className="text-gray-600">License: {doctor.license_number}</p>}
-        {doctor.verified_by_admin && <p className="text-green-600 font-semibold">Verified</p>}
-        {!doctor.verified_by_admin && <p className="text-yellow-600 font-semibold">Pending Verification</p>}
-      </div>
+export default function DoctorCard({
+  doctor_code,
+  name,
+  specialization,
+  experience_years,
+  onBook,
+}: DoctorCardProps) {
+  // Highlight any '7' character in yellow and slightly bigger
+  const highlightSevens = (text: string | number) => {
+    if (!text) return "";
+    return String(text)
+      .split("")
+      .map((char, i) =>
+        char === "7" ? (
+          <span key={i} className="text-yellow-500 text-lg font-semibold">
+            {char}
+          </span>
+        ) : (
+          <span key={i}>{char}</span>
+        )
+      );
+  };
 
+  return (
+    <div className="p-5 rounded-xl shadow-lg border border-orange-100 bg-white hover:shadow-xl transition-all space-y-3">
+      {/* Doctor Name */}
+      <h3 className="text-xl font-bold text-gray-900">
+        {highlightSevens(name || "Dr. Unknown")}
+      </h3>
+
+      {/* Doctor Code */}
+      <p className="text-gray-600 text-sm">
+        <strong>Doctor Code:</strong> {highlightSevens(doctor_code)}
+      </p>
+
+      {/* Specialization */}
+      <p className="text-gray-700">
+        <strong>Specialization:</strong>{" "}
+        {highlightSevens(specialization || "General")}
+      </p>
+
+      {/* Experience (optional) */}
+      {experience_years !== undefined && (
+        <p className="text-gray-700">
+          <strong>Experience:</strong>{" "}
+          {highlightSevens(`${experience_years} years`)}
+        </p>
+      )}
+
+      {/* Book Button */}
       <button
-        onClick={onSelect}
-        className="mt-3 bg-blue-600 text-white py-1 px-3 rounded hover:bg-blue-700"
+        onClick={onBook}
+        className="mt-4 w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg font-medium transition-all"
       >
-        Select
+        Book Appointment
       </button>
     </div>
   );
