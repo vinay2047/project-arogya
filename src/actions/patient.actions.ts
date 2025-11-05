@@ -10,7 +10,8 @@ export async function createPatientProfile(formData: FormData) {
   const gender = formData.get("gender") as string;
   const blood_group = formData.get("blood_group") as string;
   const address = formData.get("address") as string;
-
+  const latitude = formData.get("latitude") as string;
+  const longitude = formData.get("longitude") as string;
 
   if (!dob || !gender || !blood_group || !address) {
     throw new Error("All fields are required");
@@ -25,7 +26,6 @@ export async function createPatientProfile(formData: FormData) {
     redirect("/auth/signup");
   }
 
- 
   const { data: existing } = await supabase
     .from("patient_profiles")
     .select("user_id")
@@ -43,6 +43,8 @@ export async function createPatientProfile(formData: FormData) {
       gender,
       blood_group,
       address,
+      latitude: latitude ? parseFloat(latitude) : null,
+      longitude: longitude ? parseFloat(longitude) : null,
     },
   ]);
 

@@ -1,5 +1,6 @@
-"use server";
+"use client";
 
+import { useState } from "react";
 import { createPatientProfile } from "@/actions/patient.actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +21,35 @@ import {
   CardContent,
 } from "@/components/ui/card";
 
-export default async function PatientOnboardingPage() {
+export default function PatientOnboardingPage() {
+  const [coords, setCoords] = useState<{ lat: number | null; lng: number | null }>({
+    lat: null,
+    lng: null,
+  });
+  const [locStatus, setLocStatus] = useState<string>("");
+
+  const handleEnableLocation = () => {
+    if (!navigator.geolocation) {
+      setLocStatus("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    setLocStatus("Requesting permission...");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setCoords({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+        setLocStatus("✅ Location enabled successfully!");
+      },
+      (error) => {
+        console.warn("Location access denied:", error.message);
+        setLocStatus("⚠️ Could not access location. You can continue without it.");
+      }
+    );
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen">
       <Card className="w-full max-w-md">
@@ -31,7 +60,39 @@ export default async function PatientOnboardingPage() {
 
         <CardContent>
           <form action={createPatientProfile} className="flex flex-col gap-6">
-            
+            {/* Hidden location fields */}
+            <input type="hidden" name="latitude" value={coords.lat ?? ""} />
+            <input type="hidden" name="longitude" value={coords.lng ?? ""} />
+
+            {/* Location Prompt */}
+            <div className="flex flex-col gap-2">
+              <Label>Location Access (Optional)</Label>
+              <p className="text-sm text-gray-600">
+                Help us find professionals near you by enabling location access.
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleEnableLocation}
+              >
+                📍 Enable Location
+              </Button>
+              {locStatus && (
+                <p
+                  className={`text-sm ${
+                    locStatus.startsWith("✅")
+                      ? "text-green-600"
+                      : locStatus.startsWith("⚠️")
+                      ? "text-yellow-600"
+                      : "text-gray-500"
+                  }`}
+                >
+                  {locStatus}
+                </p>
+              )}
+            </div>
+
+            {/* DOB */}
             <div className="grid gap-2">
               <Label htmlFor="dob">Date of Birth</Label>
               <Input id="dob" name="dob" type="date" required />
